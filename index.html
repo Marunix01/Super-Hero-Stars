@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Superhero Game</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #f0f8ff;
+    }
+    #gameCanvas {
+      display: block;
+      margin: 0 auto;
+      background: linear-gradient(to bottom, #87ceeb, #1e90ff);
+    }
+    .scoreboard {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      color: white;
+      font-size: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="scoreboard">Score: <span id="score">0</span></div>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Game settings
+    const heroWidth = 50, heroHeight = 50;
+    const starWidth = 30, starHeight = 30;
+    const bombWidth = 40, bombHeight = 40;
+    const canvasWidth = canvas.width, canvasHeight = canvas.height;
+
+    let heroX = canvasWidth / 2 - heroWidth / 2;
+    let heroY = canvasHeight - heroHeight - 10;
+    let starX = Math.random() * (canvasWidth - starWidth);
+    let starY = Math.random() * (canvasHeight - 200);
+    let bombX = Math.random() * (canvasWidth - bombWidth);
+    let bombY = -bombHeight;
+    let bombSpeed = 3;
+    let score = 0;
+
+    let leftPressed = false, rightPressed = false;
+
+    // Load images
+    const heroImg = new Image();
+    const starImg = new Image();
+    const bombImg = new Image();
+    heroImg.src = "https://via.placeholder.com/50x50/0000FF/FFFFFF?text=H";
+    starImg.src = "https://via.placeholder.com/30x30/FFFF00/000000?text=*";
+    bombImg.src = "https://via.placeholder.com/40x40/FF0000/FFFFFF?text=B";
+
+    // Event listeners for movement
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") leftPressed = true;
+      if (e.key === "ArrowRight") rightPressed = true;
+    });
+
+    document.addEventListener("keyup", (e) => {
+      if (e.key === "ArrowLeft") leftPressed = false;
+      if (e.key === "ArrowRight") rightPressed = false;
+    });
+
+    // Game loop
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+      // Move hero
+      if (leftPressed && heroX > 0) heroX -= 5;
+      if (rightPressed && heroX < canvasWidth - heroWidth) heroX += 5;
+
+      // Move bomb
+      bombY += bombSpeed;
+      if (bombY > canvasHeight) {
+        bombY = -bombHeight;
+        bombX = Math.random() * (canvasWidth - bombWidth);
+      }
+
+      // Collision detection with star
+      if (
+        heroX < starX + starWidth &&
+        heroX + heroWidth > starX &&
+        heroY < starY + starHeight &&
+        heroY + heroHeight > starY
+      ) {
+        score++;
+        document.getElementById("score").innerText = score;
+        starX = Math.random() * (canvasWidth - starWidth);
+        starY = Math.random() * (canvasHeight - 200);
+      }
+
+      // Collision detection with bomb
+      if (
+        heroX < bombX + bombWidth &&
+        heroX + heroWidth > bombX &&
+        heroY < bombY + bombHeight &&
+        heroY + heroHeight > bombY
+      ) {
+        alert(`Game Over! Your score: ${score}`);
+        document.location.reload();
+      }
+
+      // Draw hero
+      ctx.drawImage(heroImg, heroX, heroY, heroWidth, heroHeight);
+
+      // Draw star
+      ctx.drawImage(starImg, starX, starY, starWidth, starHeight);
+
+      // Draw bomb
+      ctx.drawImage(bombImg, bombX, bombY, bombWidth, bombHeight);
+
+      // Request next frame
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Start game
+    gameLoop();
+  </script>
+</body>
+</html>
