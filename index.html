@@ -36,28 +36,20 @@
 
     // Game settings
     const heroWidth = 50, heroHeight = 50;
-    const starWidth = 30, starHeight = 30;
-    const bombWidth = 40, bombHeight = 40;
+    const starRadius = 15;
+    const bombRadius = 20;
     const canvasWidth = canvas.width, canvasHeight = canvas.height;
 
     let heroX = canvasWidth / 2 - heroWidth / 2;
     let heroY = canvasHeight - heroHeight - 10;
-    let starX = Math.random() * (canvasWidth - starWidth);
-    let starY = Math.random() * (canvasHeight - 200);
-    let bombX = Math.random() * (canvasWidth - bombWidth);
-    let bombY = -bombHeight;
+    let starX = Math.random() * (canvasWidth - starRadius * 2) + starRadius;
+    let starY = Math.random() * (canvasHeight - 200) + starRadius;
+    let bombX = Math.random() * (canvasWidth - bombRadius * 2) + bombRadius;
+    let bombY = -bombRadius;
     let bombSpeed = 3;
     let score = 0;
 
     let leftPressed = false, rightPressed = false;
-
-    // Load images
-    const heroImg = new Image();
-    const starImg = new Image();
-    const bombImg = new Image();
-    heroImg.src = "https://via.placeholder.com/50x50/0000FF/FFFFFF?text=H";
-    starImg.src = "https://via.placeholder.com/30x30/FFFF00/000000?text=*";
-    bombImg.src = "https://via.placeholder.com/40x40/FF0000/FFFFFF?text=B";
 
     // Event listeners for movement
     document.addEventListener("keydown", (e) => {
@@ -81,42 +73,41 @@
       // Move bomb
       bombY += bombSpeed;
       if (bombY > canvasHeight) {
-        bombY = -bombHeight;
-        bombX = Math.random() * (canvasWidth - bombWidth);
+        bombY = -bombRadius;
+        bombX = Math.random() * (canvasWidth - bombRadius * 2) + bombRadius;
       }
 
       // Collision detection with star
-      if (
-        heroX < starX + starWidth &&
-        heroX + heroWidth > starX &&
-        heroY < starY + starHeight &&
-        heroY + heroHeight > starY
-      ) {
+      const distStar = Math.hypot(heroX + heroWidth / 2 - starX, heroY + heroHeight / 2 - starY);
+      if (distStar < heroWidth / 2 + starRadius) {
         score++;
         document.getElementById("score").innerText = score;
-        starX = Math.random() * (canvasWidth - starWidth);
-        starY = Math.random() * (canvasHeight - 200);
+        starX = Math.random() * (canvasWidth - starRadius * 2) + starRadius;
+        starY = Math.random() * (canvasHeight - 200) + starRadius;
       }
 
       // Collision detection with bomb
-      if (
-        heroX < bombX + bombWidth &&
-        heroX + heroWidth > bombX &&
-        heroY < bombY + bombHeight &&
-        heroY + heroHeight > bombY
-      ) {
+      const distBomb = Math.hypot(heroX + heroWidth / 2 - bombX, heroY + heroHeight / 2 - bombY);
+      if (distBomb < heroWidth / 2 + bombRadius) {
         alert(`Game Over! Your score: ${score}`);
         document.location.reload();
       }
 
       // Draw hero
-      ctx.drawImage(heroImg, heroX, heroY, heroWidth, heroHeight);
+      ctx.fillStyle = "#0000FF";
+      ctx.fillRect(heroX, heroY, heroWidth, heroHeight);
 
       // Draw star
-      ctx.drawImage(starImg, starX, starY, starWidth, starHeight);
+      ctx.fillStyle = "#FFFF00";
+      ctx.beginPath();
+      ctx.arc(starX, starY, starRadius, 0, Math.PI * 2);
+      ctx.fill();
 
       // Draw bomb
-      ctx.drawImage(bombImg, bombX, bombY, bombWidth, bombHeight);
+      ctx.fillStyle = "#FF0000";
+      ctx.beginPath();
+      ctx.arc(bombX, bombY, bombRadius, 0, Math.PI * 2);
+      ctx.fill();
 
       // Request next frame
       requestAnimationFrame(gameLoop);
